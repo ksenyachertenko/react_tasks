@@ -1,0 +1,10 @@
+/*button*/
+.btn-action{
+	min-width: 120px;
+}
+.btn-done-action{
+	width:80%;
+}
+.btn-margin{
+	margin-right: 5px;
+}
