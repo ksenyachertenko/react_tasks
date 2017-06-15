@@ -1,3 +1,10 @@
+/*
+	Класс для реализации модальной формы для CRUD операций с задачами
+	тип отображения передается через параметр modal
+	tmpTasks - список задач текущего пользователя
+	scheme - схема хранения данных
+	для CUD действий соответствующие параметры - onCreate,onSave,onDelete
+*/
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -19,7 +26,10 @@ class Modal extends Component{
 	//передача элементов родительскому компоненту для сохранения
 	setData(){
 		let data = this.refs ;
-		this.props.onSave(data);
+		//проверяем action
+		(this.props.modal.type == "edit")
+			?this.props.onSave(data)
+			:this.props.onCreate(data);
 	}
 	//рендеринг статуса и приоритета
 	_getModalStatuses(status,priority,type){
@@ -109,6 +119,33 @@ class Modal extends Component{
         	{this._getModalDates(task,status,type)}
         </div></div>);
 	}
+	//верхняя часть модалки создания
+	_renderCreateModal(){
+		return (<div>
+			<div>
+				<div className="col-md-6 inline">заголовок</div>
+				<FormInput ref="name" value="" className="form-control"/>
+			</div>
+	        <div className="modal-block">
+	        	<div className="col-md-6 inline">приоритет</div>
+	    		<Select 
+					ref="priority" 
+					className = "form-control select-margin-top"
+					options ={ {0:'обычная',1:'важная',2:'блокирующая'} }
+					value={0}
+				/>
+	    	</div>
+	    	<div>
+	    		<div className="col-md-6 inline">описание задачи</div>
+				<FormInput type="text" value="" ref="desc" className="form-control"/>
+			</div>
+    	
+	    	<div className="alert clearfix alert-success">
+	        	<div className="col-md-6 inline">срок</div>
+					<FormInput ref="end" value="" className="form-control" type="date"/>
+	        </div>
+	    </div>);
+	}
 	//рендеринг заголовка
 	_renderModalHead(){
 		if(!this.props.modal) return null;
@@ -118,6 +155,8 @@ class Modal extends Component{
 				return <h3 className="panel-title">Просмотр задачи</h3>
 			case "edit":
 				return <h3 className="panel-title">Редактирование задачи</h3>
+			case "create":
+				return <h3 className="panel-title">Создание задачи</h3>
 			case "delete":
 				return <h3 className="panel-title">Удаление задачи</h3>
 			default :
@@ -133,6 +172,8 @@ class Modal extends Component{
 				return this._renderViewModal()
 			case "edit":
 				return this._renderViewModal()
+			case "create":
+				return this._renderCreateModal()
 			case "delete":
 				return <h3 className="panel-title">Вы уверены что хотите удалить задачу?</h3>
 			default :
@@ -167,6 +208,13 @@ class Modal extends Component{
 			        	onClick={this.props.onDelete} 
 			        	className="btn btn-danger btn-margin"
 			        	data-dismiss="modal">ок</Button>
+			        :null
+		      	}
+		      	{(this.props.modal && this.props.modal.type == "create")
+			       ?<Button 
+			        	onClick={this.setData.bind(this)} 
+			        	className="btn btn-danger btn-margin"
+			        	data-dismiss="modal">сохранить</Button>
 			        :null
 		      	}
 		      </div>

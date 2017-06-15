@@ -1,3 +1,11 @@
+/*
+	Класс для реализации CRUD
+	row - индекс редактируемой строки (idx)
+	view - функция при отображении модалки просмотра задачи
+	edit - функция при отображении модалки редактирования задачи
+	delete - функция при отображении модалки удаления задачи
+	create - функция при отображении модалки создания задачи
+*/
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 import Button from './Button';
@@ -13,13 +21,14 @@ class Actions extends Component{
 }
 
 Actions.propTypes = {
-	row:PropTypes.number.isRequired
+	row:PropTypes.number.isRequired//номер редактируемой строки
 }
 
 Actions.propTypes = {
 	edit: ()=>{},
 	view: ()=>{},
-	delete: ()=>{}
+	delete: ()=>{},
+	create: ()=>{}
 }
 
 export default Actions

@@ -2,4 +2,23 @@ html {
   background: white;
   font: 16px Arial;
 }
+.margin-auto{
+	margin: auto;
+}
 
+/*all*/
+.inline{
+	display: inline-block;
+}
+/*scrum*/
+.container .scrum-table td {
+	border: 1px solid #ddd;
+}
+.scrum-element{
+	cursor: pointer;
+	border:1px solid #ddd;
+	margin: 0;
+}
+.scrum-name-element{
+	padding: 30px 12px 6px;
+}

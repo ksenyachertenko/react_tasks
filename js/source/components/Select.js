@@ -1,3 +1,9 @@
+/*
+	Класс для отображения выпадающих списков
+	value - значение по умолчанию
+	ref
+	options - объект значений options
+*/
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 

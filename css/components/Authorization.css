@@ -1,0 +1,8 @@
+.login-form{
+	max-width: 360px;
+	border: 1px solid #ddd;
+}
+.login-form-h2{
+	text-align: center;
+    margin-top: -15px;
+}

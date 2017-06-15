@@ -1,3 +1,7 @@
+/*
+	Класс для реализации одного из элементов формы (input,datepicker,input[password],textarea)
+	тип передается через параметр type
+*/
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 
@@ -39,7 +43,7 @@ class FormInput extends Component{
 }
 
 FormInput.propTypes = {
-	type: PropTypes.oneOf(['input','date','text'])
+	type: PropTypes.oneOf(['input','date','text','password'])
 }
 
 FormInput.defaultProps = {

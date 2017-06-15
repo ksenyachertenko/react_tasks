@@ -1,3 +1,9 @@
+/*
+	Класс для реализации табличного представления
+	tasks - список задач текущего пользователя(array)
+	scheme - схема хранения данных(array)
+	updateAllTasks - функция обновления задач в основном комполененте и localStorage
+*/
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -52,13 +58,17 @@ class TasksTable extends Component{
 
 		this.interval = null;
 	}
-	//обновление таблицы каждые 5 минут 
+	//обновление таблицы каждые 5 минут c сохранением в localStorage
 	componentDidMount() {
 		let self = this;
 		this.interval = setInterval(()=>{
-			self.updateTable();
+			new Promise((resolve, reject)=>{
+				self.updateTable();
+				resolve();
+			})
+			.then(() => this.props.updateAllTasks());
 		},300000);
-
+		this.props.updateAllTasks();
 		this.updateTable();
 	}
 	//убираем интервал до удаления из DOM
@@ -166,7 +176,7 @@ class TasksTable extends Component{
 		var date = new Date();
 		return date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
 	}
-	//проверка даты окончания временной строки
+	//проверка даты окончания строки
 	checkDateFactEnd(row){
 		if(row[this.col.status] == this.status.done && row[this.col.fact_end] == null)
 			return this.getDateToday();
@@ -181,7 +191,12 @@ class TasksTable extends Component{
 			status 	= this.state.tasks[row][this.col.status];
 
 		if(date_end == '' || [this.status.do,this.status.done].includes(parseInt(status))){
-			this.updateSortSearch(); return;
+			//если нет даты окончания и задача просрочена, ставим "ожидает выполнения"
+			if(status == this.status.lose)
+				this.setValueByIdxRow(row,this.col.status,this.status.wait);
+			else
+				this.updateSortSearch(); 
+			return;
 		}
 
 		if(date_end > date_today){
@@ -206,13 +221,34 @@ class TasksTable extends Component{
 			edit:null,
 			tasks,
 			tmpTasks
-		},this.checkStateLate(row));
+		},()=>this.checkStateLate(row));
 	}
 	//установка данных для модалки
 	setModal(type,row){
 		this.setState({modal:{type,row}},()=>{
 			$("#"+this.modalId).modal("show")
 		});
+	}
+	//создание новой задачи из модалки
+	createTaskFromModal(val){
+		let tasks 	= this.state.tasks.slice(),
+			row 	= [];
+
+		for(let key in val){
+			row[this.col[key]] = val[key].getValue();
+		}
+		//данные по умолчанию
+		row[this.col.create] = this.getDateToday();
+		row[this.col.fact_end] = null;
+		row[this.col.status] = 0;
+		row[this.col.user] = parseInt(localStorage.user);
+		row['idx'] = tasks.length;
+
+		tasks.push(row);
+		//обновляем выводимые задачи
+		let tmpTasks = this.searchTmpTasks(tasks,this.state.search.col,this.state.search.value);
+
+		this.setState({tasks:tasks,tmpTasks:tmpTasks},()=>this.checkStateLate(row['idx']));
 	}
 	//сохранение данных из модалки
 	saveFullRow(val){
@@ -222,10 +258,10 @@ class TasksTable extends Component{
 		for(let key in val){
 			tasks[row][this.col[key]] = val[key].getValue();
 		}
-
+		//обновляем выводимые задачи
 		let tmpTasks = this.searchTmpTasks(tasks,this.state.search.col,this.state.search.value);
 		
-		this.setState({tasks:tasks,tmpTasks:tmpTasks},this.checkStateLate(row));
+		this.setState({tasks:tasks,tmpTasks:tmpTasks},()=>this.checkStateLate(row));
 	}
 	//удаление(модалка)
 	deleteRow(){
@@ -234,7 +270,7 @@ class TasksTable extends Component{
 		tasks.splice(this.state.modal.row,1);
 		//обновляем idx
 		tasks.map((item,idx)=>item['idx'] = idx);
-
+		//обновляем выводимые задачи
 		let tmpTasks = this.searchTmpTasks(tasks,this.state.search.col,this.state.search.value);
 
 		this.setState({tasks,tmpTasks});
@@ -351,11 +387,17 @@ class TasksTable extends Component{
 				className="modal fade" 
 				modal={this.state.modal}
 				onSave = {this.saveFullRow.bind(this)}
+				onCreate = {this.createTaskFromModal.bind(this)}
 				onDelete = {this.deleteRow.bind(this)}
 				tmpTasks = {this.state.tasks}
 				scheme = {this.props.scheme}
 			/>
-			<table className="table">
+			<Button 
+				className="btn btn-danger"
+				onClick={this.setModal.bind(this,"create",null)}
+				>добавить задачу
+			</Button>
+			<table className="table" id="TasksTable" data-table={JSON.stringify(this.state.tasks)}>
 				{this._renderTHead()}
 				{this._renderTBody()}
 			</table>
